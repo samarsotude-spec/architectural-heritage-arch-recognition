@@ -17,7 +17,7 @@ A fixed stratified split with random seed **42** was used throughout all reporte
 | Validation | 748 | 438 | 310 |
 | Test | 1,496 | 877 | 619 |
 
-The same fixed test set was retained for every reported model comparison.
+The same fixed test set was retained for every reported model comparison. A separate post-hoc ResNet50 sensitivity analysis excludes 21 exact-overlap test images; it does not change the original partitions.
 
 ## Models and experiments
 
@@ -26,15 +26,18 @@ The repository includes implementations of:
 - ImageNet-pretrained **ResNet50** with partial fine-tuning
 - ImageNet-pretrained **DenseNet121** with partial fine-tuning
 - ImageNet-pretrained **MobileNetV2** with partial fine-tuning
+- ImageNet-pretrained **ConvNeXt-Tiny** with partial fine-tuning (no augmentation)
 - **HOG + Linear SVM** conventional baseline
 - **ResNet50 with architecture-aware data augmentation**
 - Misclassification analysis for the final ResNet50 baseline
+- Saved-checkpoint **ResNet50 exact-overlap sensitivity evaluation without retraining**
 
 ## Final reported results
 
 | Model | Test Accuracy | Macro F1 |
 |---|---:|---:|
 | ResNet50 | **91.98%** | **0.9174** |
+| ConvNeXt-Tiny | 91.98% | 0.9176 |
 | DenseNet121 | 90.84% | 0.9063 |
 | MobileNetV2 | 87.70% | 0.8746 |
 | HOG + Linear SVM | 61.97% | 0.6110 |
@@ -56,6 +59,34 @@ This corresponds to:
 - False negatives: 61
 - True positives: 816
 - Total misclassifications: 120
+
+### ConvNeXt-Tiny baseline
+
+The validation-selected checkpoint is from epoch **6** (validation loss: `0.35095349990110347`). On the original 1,496-image test set, accuracy is `0.9197860962566845` and macro F1 is `0.917556831228473`.
+
+Confusion matrix, class order **[No Arch, Has Arch]**:
+
+```text
+[[565, 54],
+ [ 66, 811]]
+```
+
+Results: [metrics](results/convnext_tiny/test_metrics.json) and [per-image predictions](results/convnext_tiny/test_predictions.csv).
+
+### ResNet50 exact-overlap sensitivity analysis
+
+The saved ResNet50 baseline checkpoint is evaluated **without retraining**, excluding 21 test images with byte-identical counterparts in training (17) or validation (4), as recorded in the SHA-256 audit.
+
+| Evaluation | Test images | Accuracy | Macro F1 |
+|---|---:|---:|---:|
+| Original fixed test set | 1,496 | 91.98% | 0.9174 |
+| Excluding 21 exact overlaps | 1,475 | 92.61% | 0.9237 |
+
+The sensitivity confusion matrix is `[[552, 54], [55, 814]]`, in class order **[No Arch, Has Arch]**. These results supplement the original evaluation; they are not an independent external test and do not establish building-level independence.
+
+The [results table](results/sensitivity/sensitivity_results.csv) contains the original and 21-exclusion scenarios. The [integrity report](results/sensitivity/integrity_and_comparability.json) records the checkpoint hash, test-image hash agreement, and reproduction of the original reference results.
+
+The public notebook uses the recorded audit pair annotations and rechecks test-image hashes. It does **not** rerun a complete train/validation duplicate search or SIFT audit. Additional scenarios retained in the notebook are for traceability; the 33- and 40-exclusion scenarios include exploratory SIFT candidates and must not be described as confirmed exact duplicates.
 
 ## Architecture-aware augmentation
 
@@ -142,6 +173,21 @@ Parameter counts:
 - Trainable: 2,162,178
 - Frozen: 4,793,728
 
+### ConvNeXt-Tiny
+
+Trainable components:
+
+- `features[7]`
+- entire classifier, with the output layer replaced by a two-class linear layer
+
+Parameter counts:
+
+- Total: 27,821,666
+- Trainable: 14,292,482
+- Frozen: 13,529,184
+
+Pretrained weights: `ConvNeXt_Tiny_Weights.IMAGENET1K_V1`. No augmentation is used in this baseline.
+
 ## HOG + Linear SVM baseline
 
 The conventional baseline uses:
@@ -160,22 +206,22 @@ The validation set was used for parameter selection, while the test set remained
 
 ## Repository structure
 
-```text
-architectural-heritage-arch-recognition/
-├── README.md
-├── requirements.txt
-├── data/
-│   ├── fixed_train_split_public.csv
-│   ├── fixed_validation_split_public.csv
-│   └── fixed_test_split_public.csv
-└── src/
-    ├── resnet50_baseline.py
-    ├── mobilenetv2_baseline.py
-    ├── densenet121_baseline.py
-    ├── hog_svm_baseline.py
-    ├── resnet50_architecture_aware_augmentation.py
-    └── failure_analysis.py
-```
+Existing baseline scripts remain in `src/`. Revision files are organized as follows:
+
+| Location | Contents |
+|---|---|
+| `data/fixed_*_split_public.csv` | Original train, validation, and test membership |
+| `data/sensitivity_test_ids.csv` | IDs of the 1,475 retained sensitivity samples |
+| `data/excluded_21_exact_overlaps.csv` | The 21 excluded samples and recorded audit evidence |
+| `src/Arch_ConvNeXtTiny_PUBLIC.ipynb` | ConvNeXt-Tiny training and test evaluation |
+| `src/Arch_ResNet50_Sensitivity_PUBLIC.ipynb` | Saved-checkpoint sensitivity evaluation without retraining |
+| `results/convnext_tiny/test_metrics.json` | ConvNeXt-Tiny test metrics |
+| `results/convnext_tiny/test_predictions.csv` | ConvNeXt-Tiny per-image predictions |
+| `results/sensitivity/original_test_predictions.csv` | Original 1,496-image ResNet50 predictions |
+| `results/sensitivity/sensitivity_test_predictions.csv` | Retained 1,475-image ResNet50 predictions |
+| `results/sensitivity/sensitivity_results.csv` | Original and 21-exclusion results |
+| `results/sensitivity/integrity_and_comparability.json` | Recorded integrity and comparability checks |
+| `results/sensitivity/README.md` | Sensitivity documentation |
 
 ## Dataset files
 
@@ -201,7 +247,7 @@ The original images were collected principally from:
 
 The raw image files are **not redistributed in this repository** because they originate from third-party documentary and published sources and remain subject to the reuse conditions of their respective sources.
 
-The exact dataset metadata, class annotations, and fixed experimental partitions are being deposited separately in **Mendeley Data**. A persistent DOI will be cited after the dataset record is publicly released.
+The associated dataset record is [Mendeley Data: t3txgj35sk](https://data.mendeley.com/datasets/t3txgj35sk). Source and reuse documentation belongs with the dataset metadata; image-specific unknowns should not be interpreted as permission to redistribute images. For reproducible citation, use the DOI of the published dataset version containing the files used in the study; this README does not confirm publication of the latest draft updates.
 
 ## Expected local dataset structure
 
@@ -277,6 +323,20 @@ python src/failure_analysis.py \
   --verify-resnet50-final
 ```
 
+### ConvNeXt-Tiny notebook
+
+Open [src/Arch_ConvNeXtTiny_PUBLIC.ipynb](src/Arch_ConvNeXtTiny_PUBLIC.ipynb) in Jupyter or Colab. Set `REPO_ROOT`, `DATASET_ROOT`, `SPLIT_ROOT`, and `OUTPUT_DIR` in its configuration cell. Supply the original images and fixed split CSVs, then run the cells in order.
+
+**Running all cells trains a new model.** New outputs default to `runs/convnext_tiny/`, separate from the deposited reference results. The notebook saves a checkpoint, training history, training configuration, test metrics, and test predictions. It may download the ImageNet pretrained weights on first use.
+
+### ResNet50 sensitivity notebook
+
+Open [src/Arch_ResNet50_Sensitivity_PUBLIC.ipynb](src/Arch_ResNet50_Sensitivity_PUBLIC.ipynb). Configure `CKPT` and `DIRS` in the first code cell to point to the original saved ResNet50 checkpoint and image directories. Run cells in order; no training is performed. Use scenario `exclude_21_exact_any_overlap` for the manuscript sensitivity analysis.
+
+The original images and saved checkpoint must be supplied separately; they are not embedded in the notebook. The recorded checkpoint hash is available in the integrity report. A checkpoint download link is not supplied in this README.
+
+Both notebooks require `torch`, `torchvision`, `numpy`, `pandas`, `Pillow`, and `scikit-learn`, plus a notebook interface. Exact original package versions were not recorded in the supplied ConvNeXt-Tiny notebook; it is not a pinned execution environment.
+
 ## Reproducibility note
 
 The repository uses the deposited split CSV files directly rather than regenerating the train/validation/test partition from directory order. This avoids accidental variation caused by filesystem ordering and preserves the exact experimental membership used in the study.
@@ -285,11 +345,11 @@ The fixed test set is never used for model selection.
 
 ## Data and code availability
 
-The repository is currently being prepared for the public release associated with the research article. The Mendeley Data record and this code repository will be cross-linked after final release.
+Code and evaluation outputs are organized at the paths listed above. Dataset metadata and fixed partitions are associated with the [Mendeley Data record](https://data.mendeley.com/datasets/t3txgj35sk). Check the selected published version for the required files; draft additions are not evidence of public availability.
 
 ## Citation
 
-Citation information will be added after publication of the associated article and final activation of the dataset DOI.
+Article citation information will be added after publication. Cite the specific published Mendeley Data version used, rather than a draft URL.
 
 ## License
 
