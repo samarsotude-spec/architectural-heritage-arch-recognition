@@ -1,0 +1,32 @@
+{
+  "reference_confusion_matrix": [
+    [
+      560,
+      59
+    ],
+    [
+      61,
+      816
+    ]
+  ],
+  "observed_confusion_matrix": [
+    [
+      560,
+      59
+    ],
+    [
+      61,
+      816
+    ]
+  ],
+  "reference_reproduced": true,
+  "prior_audit_sha_mismatches": 0,
+  "directly_comparable_to_original": true,
+  "checkpoint_sha256": "0d3e0aa0379e0fd79124d9ee970824af35f6a0b5413f639d225348a36c626c0d",
+  "n_rows": 1496,
+  "embedded_metadata_source_checksums": {
+    "fixed_test_split_public.csv": "e90890b88ebda095410f287f09aea47802b07a0783e9f9b0f1b8b9c15966c86b",
+    "02_HIGH_PRIORITY_31_EXACT_AND_29_NEAR_EXACT.csv": "5e43d051367aac7685d41011b3ed3bbc6a4c16e52f4f29290b9cddae7310d872"
+  },
+  "interpretation": "Post-hoc sensitivity analysis ONLY; no retraining, leakage-free claim, or building-disjoint validation."
+}

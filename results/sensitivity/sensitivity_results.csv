@@ -1,0 +1,3 @@
+scenario,n_kept,n_excluded,accuracy_pct,macro_f1,no_arch_precision,no_arch_recall,no_arch_f1,has_arch_precision,has_arch_recall,has_arch_f1,no_arch_support,has_arch_support,tn,fp,fn,tp,original_reference_reproduced,all_test_image_hashes_match_prior_audit,comparable_to_published_original
+original_test_all_1496,1496,0,91.97860962566845,0.9173663278833406,0.9017713365539453,0.9046849757673667,0.9032258064516129,0.9325714285714286,0.9304446978335233,0.9315068493150684,619,877,560,59,61,816,True,True,True
+exclude_21_exact_any_overlap,1475,21,92.61016949152543,0.9236941386751945,0.9093904448105437,0.9108910891089109,0.9101401483924155,0.9377880184331797,0.9367088607594937,0.9372481289579735,606,869,552,54,55,814,True,True,True
