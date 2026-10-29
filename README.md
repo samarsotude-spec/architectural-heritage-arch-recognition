@@ -333,7 +333,7 @@ Open [src/Arch_ConvNeXtTiny_PUBLIC.ipynb](src/Arch_ConvNeXtTiny_PUBLIC.ipynb) in
 
 Open [src/Arch_ResNet50_Sensitivity_PUBLIC.ipynb](src/Arch_ResNet50_Sensitivity_PUBLIC.ipynb). Configure `CKPT` and `DIRS` in the first code cell to point to the original saved ResNet50 checkpoint and image directories. Run cells in order; no training is performed. Use scenario `exclude_21_exact_any_overlap` for the manuscript sensitivity analysis.
 
-The original images and saved checkpoint must be supplied separately; they are not embedded in the notebook. The recorded checkpoint hash is available in the integrity report. A checkpoint download link is not supplied in this README.
+The original images and saved checkpoint must be supplied separately; they are not embedded in the notebook. The recorded checkpoint hash is available in the integrity report. Download `best_resnet50_baseline.pth` from the **Assets** section of [Release v1.0.0](https://github.com/samarsotude-spec/architectural-heritage-arch-recognition/releases/tag/v1.0.0). Set `CKPT` in the sensitivity notebook to the downloaded file's local path.
 
 Both notebooks require `torch`, `torchvision`, `numpy`, `pandas`, `Pillow`, and `scikit-learn`, plus a notebook interface. Exact original package versions were not recorded in the supplied ConvNeXt-Tiny notebook; it is not a pinned execution environment.
 
